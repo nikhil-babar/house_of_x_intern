@@ -13,6 +13,7 @@ const envSchema = joi.object({
   DB_PORT: joi.number().integer(),
   DB_HOST: joi.string(),
   DB_NAME: joi.string(),
+  BACKEND_URL: joi.string(),
 });
 
 export interface Env {
@@ -22,6 +23,7 @@ export interface Env {
   DB_PORT: number;
   DB_HOST: string;
   DB_NAME: string;
+  BACKEND_URL: string;
 }
 
 function getEnv(): Env {

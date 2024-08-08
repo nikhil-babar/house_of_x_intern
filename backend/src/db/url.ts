@@ -1,7 +1,10 @@
 import { Knex } from "knex";
 import { URL } from "../types/db";
 import client from "./client";
-import { build } from "joi";
+import getEnv from "../envConfig";
+import { v4 } from "uuid";
+
+const env = getEnv();
 
 export class URLService {
   url: Knex.QueryBuilder<URL>;
@@ -42,6 +45,14 @@ export class URLService {
       .andWhereILike("name", `%${category}%`);
   }
 
+  async incrementAndGet(url_id: string) {
+    const res: URL[] = await this.url.where("id", "=", url_id).select();
+
+    await this.url.where("id", "=", url_id).increment("user_count");
+
+    return res[0];
+  }
+
   async get(
     page_no: number,
     page_size: number
@@ -66,5 +77,24 @@ export class URLService {
       data: res,
       hasNext,
     };
+  }
+
+  async add(user_id: string, name: string, category: string, url: string) {
+    const id = v4();
+    const generated_url = `${env.BACKEND_URL}/url/hit/${id}`;
+
+    const res = await this.url.insert({
+      id: id,
+      name,
+      url: generated_url,
+      redirect_url: url,
+      category,
+      user_count: 0,
+      user_id,
+      created_at: new Date().toISOString().substring(0, 19).replace("T", " "),
+      updated_at: new Date().toISOString().substring(0, 19).replace("T", " "),
+    });
+
+    return res;
   }
 }
